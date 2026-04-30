@@ -10,43 +10,37 @@ import java.util.List;
 @Component
 public class RoleGuard {
 
-    public boolean isPermitted(ServerWebExchange exchange, Claims claims) {
-        String path   = exchange.getRequest().getPath().toString();
-        HttpMethod method = exchange.getRequest().getMethod();
+	public boolean isPermitted(ServerWebExchange exchange, Claims claims) {
+	    String path   = exchange.getRequest().getPath().toString();
+	    HttpMethod method = exchange.getRequest().getMethod();
 
-        @SuppressWarnings("unchecked")
-        List<String> roles = claims.get("roles", List.class);
-        if (roles == null) roles = List.of();
-        
-        System.out.println("[RoleGuard] path=" + path + " method=" + method + " roles=" + roles);
+	    @SuppressWarnings("unchecked")
+	    List<String> roles = claims.get("roles", List.class);
+	    if (roles == null) roles = List.of();
 
-        boolean isAdmin = roles.contains("ROLE_ADMIN");
-        boolean isUser  = roles.contains("ROLE_USER") || isAdmin; // admin inherits user
+	    boolean isAdmin = roles.contains("ROLE_ADMIN");
+	    boolean isUser  = roles.contains("ROLE_USER") || isAdmin;
 
-        // --- /users routes ---
-        if (path.matches("^/users/\\d+$")) {
-            if (HttpMethod.DELETE.equals(method)) return isAdmin;
-            if (HttpMethod.GET.equals(method) || HttpMethod.PUT.equals(method)) return isUser;
-            return false;
-        }
+	    if (path.matches("^/api/users/\\d+$")) {
+	        if (HttpMethod.DELETE.equals(method)) return isAdmin;
+	        if (HttpMethod.GET.equals(method) || HttpMethod.PUT.equals(method)) return isUser;
+	        return false;
+	    }
 
-        if (path.equals("/users")) {
-            if (HttpMethod.GET.equals(method))  return isAdmin; // list all = admin only
-            if (HttpMethod.POST.equals(method)) return isAdmin; // create via admin only
-            return false;
-        }
+	    if (path.equals("/api/users")) {
+	        if (HttpMethod.GET.equals(method))  return isAdmin;
+	        if (HttpMethod.POST.equals(method)) return isAdmin;
+	        return false;
+	    }
 
-        // --- /files routes ---
-        if (path.startsWith("/files/")) {
-            return isUser;
-        }
+	    if (path.startsWith("/api/files/")) {
+	        return isUser;
+	    }
 
-        // --- /admin routes ---
-        if (path.startsWith("/admin/")) {
-            return isAdmin;
-        }
+	    if (path.startsWith("/api/admin/")) {
+	        return isAdmin;
+	    }
 
-        // Deny anything else
-        return false;
-    }
+	    return false;
+	}
 }

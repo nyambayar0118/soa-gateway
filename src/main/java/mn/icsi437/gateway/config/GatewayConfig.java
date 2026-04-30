@@ -30,11 +30,11 @@ public class GatewayConfig {
         WebClient fileManagerClient = builder.baseUrl(fileManagerUrl).build();
 
         return RouterFunctions.route()
-            .path("/auth",  () -> proxy(authClient))
-            .path("/users", () -> proxy(profileClient))
-            .path("/files", () -> proxy(fileManagerClient))
-            .path("/admin", () -> proxy(profileClient))
-            .build();
+        	    .path("/api/auth",  () -> proxy(authClient))
+        	    .path("/api/users", () -> proxy(profileClient))
+        	    .path("/api/files", () -> proxy(fileManagerClient))
+        	    .path("/api/admin", () -> proxy(profileClient))
+        	    .build();
     }
 
     @Bean
@@ -52,9 +52,15 @@ public class GatewayConfig {
 
     private RouterFunction<ServerResponse> proxy(WebClient client) {
         return RouterFunctions.route()
-            .route(RequestPredicates.all(), request ->
-                client.method(request.method())
-                    .uri(request.uri().getPath() +
+            .route(RequestPredicates.all(), request -> {
+                String fullPath = request.uri().getPath();
+                // /api/auth/login → /auth/login (strip "/api")
+                String backendPath = fullPath.startsWith("/api")
+                    ? fullPath.substring(4)  // length of "/api"
+                    : fullPath;
+
+                return client.method(request.method())
+                    .uri(backendPath +
                         (request.uri().getQuery() != null
                             ? "?" + request.uri().getQuery() : ""))
                     .headers(h -> h.addAll(request.headers().asHttpHeaders()))
@@ -75,8 +81,8 @@ public class GatewayConfig {
                                     })
                                     .bodyValue(body)
                             )
-                    )
-            )
+                    );
+            })
             .build();
     }
 }

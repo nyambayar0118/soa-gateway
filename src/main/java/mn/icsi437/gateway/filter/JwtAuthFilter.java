@@ -22,10 +22,10 @@ import java.util.List;
 @Order(-1)
 public class JwtAuthFilter implements WebFilter {
 
-    private static final List<String> PUBLIC_PATHS = List.of(
-            "/auth/login",
-            "/auth/register"
-    );
+	private static final List<String> PUBLIC_PATHS = List.of(
+	        "/api/auth/login",
+	        "/api/auth/register"
+	);
 
     @Value("${jwt.secret}")
     private String jwtSecret;
