@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
+
+jwt:
+  secret: test-secret-key-for-unit-tests-only-32chars!!
+
+services:
+  auth:        http://localhost:8080
+  profile:     http://localhost:8081
+  filemanager: http://localhost:8083
